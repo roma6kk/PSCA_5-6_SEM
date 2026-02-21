@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>API Manager - PSCA18</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            max-width: 1200px; 
+            margin: 20px auto; 
+            line-height: 1.6; 
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #333; }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ccc;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: #f0f0f0;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group { 
+            border: 1px solid #ccc; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border-radius: 4px; 
+            background: #f9f9f9;
+        }
+        .form-group h3 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+        input { 
+            display: block; 
+            margin: 8px 0; 
+            width: 100%; 
+            box-sizing: border-box; 
+            padding: 8px; 
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        button { 
+            cursor: pointer; 
+            padding: 8px 20px; 
+            margin-right: 10px; 
+            margin-top: 10px;
+            border: none;
+            border-radius: 4px;
+            background: #4CAF50;
+            color: white;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.delete-btn {
+            background: #f44336;
+        }
+        button.delete-btn:hover {
+            background: #da190b;
+        }
+        #result { 
+            background: #f4f4f4; 
+            padding: 15px; 
+            white-space: pre-wrap; 
+            border: 1px solid #ddd; 
+            min-height: 100px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            color: #f44336;
+        }
+        .success {
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Manager - Управление данными</h1>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('faculties')">Факультеты</button>
+        <button class="tab" onclick="showTab('pulpits')">Кафедры</button>
+        <button class="tab" onclick="showTab('subjects')">Дисциплины</button>
+        <button class="tab" onclick="showTab('auditoriumstypes')">Типы аудиторий</button>
+        <button class="tab" onclick="showTab('auditoriums')">Аудитории</button>
+    </div>
+
+    <!-- Факультеты -->
+    <div id="faculties" class="tab-content active">
+        <div class="form-group">
+            <h3>Факультеты (FACULTY)</h3>
+            <input id="faculty_code" placeholder="Код факультета (например, ИДиП)">
+            <input id="faculty_name" placeholder="Название факультета">
+            
+            <button onclick="doGet('faculties')">Получить все</button>
+            <button onclick="doPost('faculties')">Добавить</button>
+            <button onclick="doPut('faculties')">Обновить</button>
+            <button class="delete-btn" onclick="doDelete('faculties')">Удалить по коду</button>
+        </div>
+    </div>
+
+    <!-- Кафедры -->
+    <div id="pulpits" class="tab-content">
+        <div class="form-group">
+            <h3>Кафедры (PULPIT)</h3>
+            <input id="pulpit_code" placeholder="Код кафедры (например, ИСИТ)">
+            <input id="pulpit_name" placeholder="Название кафедры">
+            <input id="pulpit_faculty" placeholder="Код факультета">
+            
+            <button onclick="doGet('pulpits')">Получить все</button>
+            <button onclick="doPost('pulpits')">Добавить</button>
+            <button onclick="doPut('pulpits')">Обновить</button>
+            <button class="delete-btn" onclick="doDelete('pulpits')">Удалить по коду</button>
+        </div>
+    </div>
+
+    <!-- Дисциплины -->
+    <div id="subjects" class="tab-content">
+        <div class="form-group">
+            <h3>Дисциплины (SUBJECT)</h3>
+            <input id="subject_code" placeholder="Код дисциплины">
+            <input id="subject_name" placeholder="Название дисциплины">
+            <input id="subject_pulpit" placeholder="Код кафедры">
+            
+            <button onclick="doGet('subjects')">Получить все</button>
+            <button onclick="doPost('subjects')">Добавить</button>
+            <button onclick="doPut('subjects')">Обновить</button>
+            <button class="delete-btn" onclick="doDelete('subjects')">Удалить по коду</button>
+        </div>
+    </div>
+
+    <!-- Типы аудиторий -->
+    <div id="auditoriumstypes" class="tab-content">
+        <div class="form-group">
+            <h3>Типы аудиторий (AUDITORIUM_TYPE)</h3>
+            <input id="auditoriumtype_code" placeholder="Код типа аудитории">
+            <input id="auditoriumtype_name" placeholder="Название типа">
+            
+            <button onclick="doGet('auditoriumstypes')">Получить все</button>
+            <button onclick="doPost('auditoriumstypes')">Добавить</button>
+            <button onclick="doPut('auditoriumstypes')">Обновить</button>
+            <button class="delete-btn" onclick="doDelete('auditoriumstypes')">Удалить по коду</button>
+        </div>
+    </div>
+
+    <!-- Аудитории -->
+    <div id="auditoriums" class="tab-content">
+        <div class="form-group">
+            <h3>Аудитории (AUDITORIUM)</h3>
+            <input id="auditorium_code" placeholder="Код аудитории">
+            <input id="auditorium_name" placeholder="Название/номер аудитории">
+            <input id="auditorium_capacity" type="number" placeholder="Вместимость">
+            <input id="auditorium_type" placeholder="Код типа аудитории">
+            
+            <button onclick="doGet('auditoriums')">Получить все</button>
+            <button onclick="doPost('auditoriums')">Добавить</button>
+            <button onclick="doPut('auditoriums')">Обновить</button>
+            <button class="delete-btn" onclick="doDelete('auditoriums')">Удалить по коду</button>
+        </div>
+    </div>
+
+    <strong>Результат:</strong>
+    <pre id="result">Здесь будет ответ сервера...</pre>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+        const out = document.getElementById('result');
+
+        function showTab(tabName) {
+            // Скрыть все вкладки
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Показать выбранную вкладку
+            document.getElementById(tabName).classList.add('active');
+            // Найти и активировать соответствующую кнопку вкладки
+            document.querySelectorAll('.tab').forEach((btn, index) => {
+                const tabs = ['faculties', 'pulpits', 'subjects', 'auditoriumstypes', 'auditoriums'];
+                if (tabs[index] === tabName) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        const show = (data) => {
+            if (data.error) {
+                out.className = 'error';
+            } else {
+                out.className = 'success';
+            }
+            out.textContent = JSON.stringify(data, null, 2);
+        };
+
+        async function doGet(entity) {
+            try {
+                const res = await fetch(`${API_BASE}/${entity}`);
+                const data = await res.json();
+                show(data);
+            } catch (err) {
+                show({ error: 'Ошибка запроса', message: err.message });
+            }
+        }
+
+        async function doPost(entity) {
+            try {
+                let body = {};
+                
+                switch(entity) {
+                    case 'faculties':
+                        body = {
+                            faculty: document.getElementById('faculty_code').value,
+                            faculty_name: document.getElementById('faculty_name').value
+                        };
+                        break;
+                    case 'pulpits':
+                        body = {
+                            pulpit: document.getElementById('pulpit_code').value,
+                            pulpit_name: document.getElementById('pulpit_name').value,
+                            faculty: document.getElementById('pulpit_faculty').value
+                        };
+                        break;
+                    case 'subjects':
+                        body = {
+                            subject: document.getElementById('subject_code').value,
+                            subject_name: document.getElementById('subject_name').value,
+                            pulpit: document.getElementById('subject_pulpit').value
+                        };
+                        break;
+                    case 'auditoriumstypes':
+                        body = {
+                            auditorium_type: document.getElementById('auditoriumtype_code').value,
+                            auditorium_typename: document.getElementById('auditoriumtype_name').value
+                        };
+                        break;
+                    case 'auditoriums':
+                        const capacityValue = document.getElementById('auditorium_capacity').value;
+                        body = {
+                            auditorium: document.getElementById('auditorium_code').value,
+                            auditorium_name: document.getElementById('auditorium_name').value,
+                            auditorium_capacity: capacityValue ? parseInt(capacityValue) : undefined,
+                            auditorium_type: document.getElementById('auditorium_type').value
+                        };
+                        break;
+                }
+                
+                const res = await fetch(`${API_BASE}/${entity}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                show(await res.json());
+            } catch (err) {
+                show({ error: 'Ошибка запроса', message: err.message });
+            }
+        }
+
+        async function doPut(entity) {
+            try {
+                let body = {};
+                
+                switch(entity) {
+                    case 'faculties':
+                        body = {
+                            faculty: document.getElementById('faculty_code').value,
+                            faculty_name: document.getElementById('faculty_name').value
+                        };
+                        break;
+                    case 'pulpits':
+                        body = {
+                            pulpit: document.getElementById('pulpit_code').value,
+                            pulpit_name: document.getElementById('pulpit_name').value,
+                            faculty: document.getElementById('pulpit_faculty').value
+                        };
+                        break;
+                    case 'subjects':
+                        body = {
+                            subject: document.getElementById('subject_code').value,
+                            subject_name: document.getElementById('subject_name').value,
+                            pulpit: document.getElementById('subject_pulpit').value
+                        };
+                        break;
+                    case 'auditoriumstypes':
+                        body = {
+                            auditorium_type: document.getElementById('auditoriumtype_code').value,
+                            auditorium_typename: document.getElementById('auditoriumtype_name').value
+                        };
+                        break;
+                    case 'auditoriums':
+                        const capacityValue = document.getElementById('auditorium_capacity').value;
+                        body = {
+                            auditorium: document.getElementById('auditorium_code').value,
+                            auditorium_name: document.getElementById('auditorium_name').value,
+                            auditorium_capacity: capacityValue ? parseInt(capacityValue) : undefined,
+                            auditorium_type: document.getElementById('auditorium_type').value
+                        };
+                        break;
+                }
+                
+                const res = await fetch(`${API_BASE}/${entity}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                show(await res.json());
+            } catch (err) {
+                show({ error: 'Ошибка запроса', message: err.message });
+            }
+        }
+
+        async function doDelete(entity) {
+            try {
+                let id = '';
+                
+                switch(entity) {
+                    case 'faculties':
+                        id = document.getElementById('faculty_code').value;
+                        break;
+                    case 'pulpits':
+                        id = document.getElementById('pulpit_code').value;
+                        break;
+                    case 'subjects':
+                        id = document.getElementById('subject_code').value;
+                        break;
+                    case 'auditoriumstypes':
+                        id = document.getElementById('auditoriumtype_code').value;
+                        break;
+                    case 'auditoriums':
+                        id = document.getElementById('auditorium_code').value;
+                        break;
+                }
+                
+                if (!id) {
+                    show({ error: 'Ошибка', message: 'Введите код для удаления' });
+                    return;
+                }
+                
+                const res = await fetch(`${API_BASE}/${entity}/${encodeURIComponent(id)}`, { 
+                    method: 'DELETE' 
+                });
+                show(await res.json());
+            } catch (err) {
+                show({ error: 'Ошибка запроса', message: err.message });
+            }
+        }
+    </script>
+</body>
+</html>

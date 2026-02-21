@@ -1,0 +1,13 @@
+{
+  "name": "psca18-01",
+  "version": "1.0.0",
+  "description": "HTTP Server with Sequelize CRUD API",
+  "main": "18-01.js",
+  "scripts": {
+    "start": "node 18-01.js"
+  },
+  "dependencies": {
+    "sequelize": "^6.37.7",
+    "tedious": "^17.0.0"
+  }
+}
